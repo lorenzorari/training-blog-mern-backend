@@ -25,6 +25,19 @@ const withDB = async (operations, res) => {
   }
 };
 
+app.get("/api/articles", async (req, res) => {
+  withDB(async (db) => {
+    try {
+      const articles = db.collection("articles");
+      const articlesFound = await articles.find({}).toArray();
+
+      res.status(200).json(articlesFound);
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  });
+});
+
 app.post("/api/articles", async (req, res) => {
   withDB(async (db) => {
     try {
@@ -37,7 +50,7 @@ app.post("/api/articles", async (req, res) => {
 
       res.status(200).json(updatedArticles);
     } catch (err) {
-      res.status(400).json({ message: err });
+      res.status(400).json({ message: err.message });
     }
   });
 });
