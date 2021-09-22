@@ -44,7 +44,7 @@ app.post("/api/articles", async (req, res) => {
       const { author, title } = req.body;
       const articles = db.collection("articles");
 
-      await articles.insertOne({ author, title });
+      await articles.insertOne({ author, title, comments: [] });
 
       const updatedArticles = await articles.findOne({ author, title });
 
