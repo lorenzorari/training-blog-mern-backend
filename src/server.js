@@ -1,5 +1,5 @@
 const express = require("express");
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 
 const port = 8000;
 
@@ -10,12 +10,12 @@ app.use(express.json());
 const withDB = async (operations, res) => {
   const url = "mongodb://localhost:27017";
   const dbName = "training_blog";
+  const client = new MongoClient(url);
 
   try {
-    const client = new MongoClient(url);
     await client.connect();
     const db = client.db(dbName);
-    operations(db);
+    await operations(db);
   } catch (err) {
     res
       .status(500)
@@ -53,6 +53,23 @@ app.post("/api/articles", async (req, res) => {
       res.status(400).json({ message: err.message });
     }
   });
+});
+
+app.delete("/api/articles/:id", async (req, res) => {
+  withDB(async (db) => {
+    try {
+      const { id } = req.params;
+      const documentToDelete = { _id: new ObjectId(id) };
+      const articles = db.collection("articles");
+
+      const articleDeleted = await articles.findOne(documentToDelete);
+      await articles.deleteOne(documentToDelete);
+
+      res.status(200).json(articleDeleted);
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  }, res);
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
